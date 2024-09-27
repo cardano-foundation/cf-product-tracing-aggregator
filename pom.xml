@@ -43,6 +43,12 @@
             <version>${yaci-store.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.bloxbean.cardano</groupId>
+            <artifactId>yaci-store-metadata-spring-boot-starter</artifactId>
+            <version>${yaci-store.version}</version>
+        </dependency>
+
 
 
         <dependency>
