@@ -27,11 +27,10 @@ public class MetaDataStorage {
 
         BolnisiAggregation bolnisiAggregation1 = new BolnisiAggregation(null,
                 currentAgg.getNumberOfBottles() + aggregationDTO.getNumberOfBottles(),
-                currentAgg.getNumberOfWineries() + wineryRepository.countAll(),
+                wineryRepository.countAll(),
                 currentAgg.getNumberOfCertificates() + aggregationDTO.getNumberOfCertificates(),
                 slot);
         bolnisiAggregationRepository.save(bolnisiAggregation1);
-//        }
     }
 
     public int deleteBySlotGreaterThan(long slot) {

@@ -13,7 +13,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>bolnisi-aggregator</name>
     <description>bolnisi-aggregator</description>
-
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
     <properties>
         <java.version>21</java.version>
         <yaci-store.version>0.1.0-rc5</yaci-store.version>
@@ -57,12 +62,21 @@
             <version>${yaci-store.version}</version>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ipld</groupId>
+            <artifactId>java-cid</artifactId>
+            <version>v1.3.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.bloxbean.cardano</groupId>
+            <artifactId>cardano-client-lib</artifactId>
+            <version>0.5.1</version>
         </dependency>
 
     </dependencies>
