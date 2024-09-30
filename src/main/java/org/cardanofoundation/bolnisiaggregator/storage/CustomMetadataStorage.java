@@ -1,13 +1,13 @@
 package org.cardanofoundation.bolnisiaggregator.storage;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
 import com.bloxbean.cardano.yaci.store.metadata.domain.TxMetadataLabel;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.TxMetadataStorageImpl;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.mapper.MetadataMapper;
 import com.bloxbean.cardano.yaci.store.metadata.storage.impl.repository.TxMetadataLabelRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.List;
 
 @Component
 public class CustomMetadataStorage extends TxMetadataStorageImpl {

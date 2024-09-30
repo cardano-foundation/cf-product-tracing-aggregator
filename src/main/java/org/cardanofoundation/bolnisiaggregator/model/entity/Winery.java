@@ -1,7 +1,6 @@
 package org.cardanofoundation.bolnisiaggregator.model.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -16,16 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "bolnisi_aggregation")
+@Table(name = "wineries")
 @Slf4j
-public class BolnisiAggregation {
+public class Winery {
 
     @Id
-    @GeneratedValue
-    private Long id;
-    int numberOfBottles;
-    int numberOfWineries;
-    int numberOfCertificates;
-    private Long slot;
-
+    private String id;
 }
