@@ -17,4 +17,7 @@ public class Cid {
     @JsonProperty("number_of_bottles")
     private int numberOfBottles;
 
+    @JsonProperty("lot_number")
+    private String lotNumber;
+
 }
