@@ -1,20 +1,16 @@
 package org.cardanofoundation.bolnisiaggregator.processor;
 
-import co.nstant.in.cbor.model.Array;
 import co.nstant.in.cbor.model.Map;
 import co.nstant.in.cbor.model.UnicodeString;
-import co.nstant.in.cbor.model.UnsignedInteger;
-import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
-import org.cardanofoundation.bolnisiaggregator.model.domain.Cid;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BolnisiProcessorTest {
