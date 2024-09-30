@@ -2,10 +2,13 @@ package org.cardanofoundation.bolnisiaggregator.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
+
 import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
 import org.cardanofoundation.bolnisiaggregator.model.entity.BolnisiAggregation;
 import org.cardanofoundation.bolnisiaggregator.model.repository.BolnisiAggregationRepository;
-import org.springframework.stereotype.Component;
+import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository;
 
 @Component
 @Slf4j
@@ -13,17 +16,18 @@ import org.springframework.stereotype.Component;
 public class MetaDataStorage {
 
     private final BolnisiAggregationRepository bolnisiAggregationRepository;
-
-    private BolnisiAggregation getBolnisiAggregation() {
-        return bolnisiAggregationRepository.findBolnisiAggregationWithMaxSlot().orElse(new BolnisiAggregation());
-    }
+    private final WineryRepository wineryRepository;
 
     public void addAggregation(AggregationDTO aggregationDTO, Long slot) {
 
-        BolnisiAggregation currentAgg = getBolnisiAggregation();
+        BolnisiAggregation currentAgg = bolnisiAggregationRepository.findBolnisiAggregationWithMaxSlot()
+                .orElse(new BolnisiAggregation());
+
+
+
         BolnisiAggregation bolnisiAggregation1 = new BolnisiAggregation(null,
                 currentAgg.getNumberOfBottles() + aggregationDTO.getNumberOfBottles(),
-                currentAgg.getNumberOfWineries() + aggregationDTO.getNumberOfWineries(),
+                currentAgg.getNumberOfWineries() + wineryRepository.countAll(),
                 currentAgg.getNumberOfCertificates() + aggregationDTO.getNumberOfCertificates(),
                 slot);
         bolnisiAggregationRepository.save(bolnisiAggregation1);

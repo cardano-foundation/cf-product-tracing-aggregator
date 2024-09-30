@@ -1,27 +1,32 @@
 package org.cardanofoundation.bolnisiaggregator.processor;
 
-import co.nstant.in.cbor.model.UnicodeString;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.bolnisiaggregator.common.Constants;
-import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
-import org.cardanofoundation.bolnisiaggregator.model.domain.Cid;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import co.nstant.in.cbor.model.Map;
+import co.nstant.in.cbor.model.UnicodeString;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.bolnisiaggregator.common.Constants;
+import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
+import org.cardanofoundation.bolnisiaggregator.model.domain.Cid;
+import org.cardanofoundation.bolnisiaggregator.model.entity.Winery;
+import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository;
 
 @Component
 @RequiredArgsConstructor
@@ -32,22 +37,34 @@ public class BolnisiProcessor {
     private String BOLNISI_RESOLVER_URL;
 
     private final RestTemplate restTemplate;
+    private final WineryRepository wineryRepository;
 
-    public Optional<AggregationDTO> processTransaction(co.nstant.in.cbor.model.Map metadata) {
+    public AggregationDTO processTransaction(co.nstant.in.cbor.model.Map metadata) {
 
         AggregationDTO aggregationDTO = new AggregationDTO();
 
-        UnicodeString type = (UnicodeString) metadata.get(new UnicodeString("t"));
-        if(type.getString().equals(Constants.SCM_TAG)) {
-            String rawData = ((UnicodeString) metadata.get(new UnicodeString(Constants.CID_TAG))).getString();
-            java.util.Map<String, List<Cid>> offChainData = getOffChainData(rawData);
-
-            int numberOfBottles = getSumOfBottlesForCID(offChainData);
-            aggregationDTO.setNumberOfBottles(numberOfBottles);
-
+        String type = (metadata.get(new UnicodeString("t"))).toString();
+        switch (type) {
+            case Constants.SCM_TAG:
+                handleSCMTag(metadata, aggregationDTO);
+                break;
+            case Constants.CERT_TAG:
+                aggregationDTO.setNumberOfCertificates(1);
+                break;
         }
-        return Optional.of(aggregationDTO);
+        return aggregationDTO;
     }
+
+    private void handleSCMTag(Map metadata, AggregationDTO aggregationDTO) {
+        String rawData = ((UnicodeString) metadata.get(new UnicodeString(Constants.CID_TAG))).getString();
+        java.util.Map<String, List<Cid>> offChainData = getOffChainData(rawData);
+
+        wineryRepository.saveAll(offChainData.keySet().stream().map(Winery::new).collect(Collectors.toList()));
+
+        int numberOfBottles = getSumOfBottlesForCID(offChainData);
+        aggregationDTO.setNumberOfBottles(numberOfBottles);
+    }
+
 
     @SneakyThrows
     private int getSumOfBottlesForCID(java.util.Map<String, List<Cid>> offchainData) {
@@ -64,7 +81,6 @@ public class BolnisiProcessor {
 
     @SneakyThrows
     private java.util.Map<String, List<Cid>> getOffChainData(String cid) {
-        int sumBottles = 0;
         String resolverURL = BOLNISI_RESOLVER_URL + cid;
         ResponseEntity<String> forEntity = restTemplate.getForEntity(resolverURL, String.class);
         String offChainData = getOffChainData(forEntity);
@@ -86,8 +102,7 @@ public class BolnisiProcessor {
                 result.append(line);
             }
         }
-        String string = result.toString();
-        return string;
+        return result.toString();
     }
 
 }

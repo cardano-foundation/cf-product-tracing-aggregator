@@ -6,7 +6,6 @@ import lombok.Data;
 public class AggregationDTO {
 
     private int numberOfBottles;
-    private int numberOfWineries;
     private int numberOfCertificates;
 
 }
