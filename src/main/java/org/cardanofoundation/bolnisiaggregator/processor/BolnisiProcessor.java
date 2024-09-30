@@ -19,8 +19,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import co.nstant.in.cbor.model.Map;
 import co.nstant.in.cbor.model.UnicodeString;
+import com.bloxbean.cardano.client.crypto.Blake2bUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ipfs.multibase.Multibase;
+import io.ipfs.multihash.Multihash;
 
 import org.cardanofoundation.bolnisiaggregator.common.Constants;
 import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
@@ -51,6 +54,8 @@ public class BolnisiProcessor {
             case Constants.CERT_TAG:
                 aggregationDTO.setNumberOfCertificates(1);
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown transaction type: " + type);
         }
         return aggregationDTO;
     }
@@ -79,13 +84,23 @@ public class BolnisiProcessor {
         return sumBottles;
     }
 
+    // zCT5htke6Y1aAtZnsMuHaaqsbDzJHtMvMWh5jhD4rira9sGCHWpK
     @SneakyThrows
-    private java.util.Map<String, List<Cid>> getOffChainData(String cid) {
+    public java.util.Map<String, List<Cid>> getOffChainData(String cid) {
         String resolverURL = BOLNISI_RESOLVER_URL + cid;
         ResponseEntity<String> forEntity = restTemplate.getForEntity(resolverURL, String.class);
         String offChainData = getOffChainData(forEntity);
-        return new ObjectMapper().readValue(offChainData, new TypeReference<java.util.Map<String, List<Cid>>>() {
-        });
+        byte[] bytes = Blake2bUtil.blake2bHash256(offChainData.getBytes());
+        io.ipfs.cid.Cid cid1 = new io.ipfs.cid.Cid(1, io.ipfs.cid.Cid.Codec.Raw, Multihash.Type.blake2b_256, bytes);
+        String encode = Multibase.encode(Multibase.Base.Base58BTC, cid1.toBytes());
+        if(cid.equals(encode)) {
+            return new ObjectMapper().readValue(offChainData, new TypeReference<java.util.Map<String, List<Cid>>>() {
+            });
+        } else {
+            log.info("CID doesn't match ");
+            return java.util.Map.of();
+        }
+
     }
 
 
