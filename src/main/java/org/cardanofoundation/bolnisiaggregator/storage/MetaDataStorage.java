@@ -1,5 +1,8 @@
 package org.cardanofoundation.bolnisiaggregator.storage;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import org.cardanofoundation.bolnisiaggregator.model.domain.NumberOfBottlesAndCerts;
 import org.cardanofoundation.bolnisiaggregator.model.entity.BolnisiAggregation;
+import org.cardanofoundation.bolnisiaggregator.model.entity.Winery;
 import org.cardanofoundation.bolnisiaggregator.model.repository.BolnisiAggregationRepository;
 import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository;
 
@@ -22,10 +26,10 @@ public class MetaDataStorage {
 
         BolnisiAggregation currentAgg = bolnisiAggregationRepository.findBolnisiAggregationWithMaxSlot()
                 .orElse(new BolnisiAggregation());
-
+        Set<String> wineryIds = wineryRepository.findAll().stream().map(Winery::getWineryId).collect(Collectors.toSet());
         BolnisiAggregation bolnisiAggregation1 = new BolnisiAggregation(null,
                 currentAgg.getNumberOfBottles() + numberOfBottlesAndCerts.getNumberOfBottles(),
-                wineryRepository.countAll(),
+                wineryIds.size(),
                 currentAgg.getNumberOfCertificates() + numberOfBottlesAndCerts.getNumberOfCertificates(),
                 slot);
 

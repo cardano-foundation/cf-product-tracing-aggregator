@@ -105,7 +105,7 @@ public class BolnisiProcessor {
         wineries.forEach(wineryId -> {
             try {
                 wineryRepository.flush();
-                Optional<Winery> byId = wineryRepository.findByWineryId(wineryId);
+                Optional<List<Winery>> byId = wineryRepository.findByWineryId(wineryId);
                 if(byId.isPresent()) {
                     log.info("Winery with ID: {} already exists", wineryId);
                     return;

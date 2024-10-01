@@ -15,9 +15,7 @@ To index the data [yaci-store](https://github.com/bloxbean/yaci-store) is used. 
 ## How to run
 1. Clone the repository
 2. Fill `.env` file with your configuration
-3. Build the docker container with `docker build -t cardano-bolnisi-aggregator .`
-   * A public pre-build docker container will be published soon
-5. Run the container with `docker run -d --env-file .env cardano-bolnisi-aggregator`
+3. Run the container with `docker compose --env-file .env up --build -d`
 
 ## Configuration
 The configuration is done via the `.env` file. The following variables are available:

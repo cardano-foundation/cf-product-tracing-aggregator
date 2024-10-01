@@ -1,5 +1,6 @@
 package org.cardanofoundation.bolnisiaggregator.model.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,6 @@ public interface WineryRepository extends JpaRepository<Winery, Long> {
     @Query("SELECT COUNT(w) FROM Winery w")
     int countAll();
 
-    Optional<Winery> findByWineryId(String wineryId);
+    Optional<List<Winery>> findByWineryId(String wineryId);
 
 }

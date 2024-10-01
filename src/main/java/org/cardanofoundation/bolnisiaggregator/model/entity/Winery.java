@@ -24,6 +24,6 @@ public class Winery {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(name = "winery_id", unique = true, nullable = false)
+    @Column(name = "winery_id", nullable = false)
     private String wineryId;
 }
