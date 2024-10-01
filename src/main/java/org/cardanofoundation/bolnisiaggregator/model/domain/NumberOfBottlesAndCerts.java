@@ -3,7 +3,7 @@ package org.cardanofoundation.bolnisiaggregator.model.domain;
 import lombok.Data;
 
 @Data
-public class AggregationDTO {
+public class NumberOfBottlesAndCerts {
 
     private int numberOfBottles;
     private int numberOfCertificates;

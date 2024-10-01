@@ -15,7 +15,7 @@ import com.bloxbean.cardano.yaci.store.events.RollbackEvent;
 import com.bloxbean.cardano.yaci.store.metadata.domain.TxMetadataEvent;
 
 import org.cardanofoundation.bolnisiaggregator.common.Constants;
-import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
+import org.cardanofoundation.bolnisiaggregator.model.domain.NumberOfBottlesAndCerts;
 import org.cardanofoundation.bolnisiaggregator.storage.MetaDataStorage;
 
 
@@ -38,8 +38,8 @@ public class CustomMetadataProcessor {
                     DataItem[] deserialize = CborSerializationUtil.deserialize(HexUtil.decodeHexString(txMetadataLabel.getCbor()));
                     Map metadata = (Map)((Map) deserialize[0]).get(new UnsignedInteger(Constants.METADATA_TAG));
 
-                    AggregationDTO aggregationDTO = bolnisiProcessor.processTransaction(metadata);
-                    metaDataStorage.addAggregation(aggregationDTO, event.getEventMetadata().getSlot());
+                    NumberOfBottlesAndCerts numberOfBottlesAndCerts = bolnisiProcessor.processTransaction(metadata);
+                    metaDataStorage.addAggregation(numberOfBottlesAndCerts, event.getEventMetadata().getSlot());
             });
     }
 

@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -17,17 +21,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import co.nstant.in.cbor.model.Map;
+import co.nstant.in.cbor.model.Array;
+import co.nstant.in.cbor.model.ByteString;
 import co.nstant.in.cbor.model.UnicodeString;
-import com.bloxbean.cardano.client.crypto.Blake2bUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.bloxbean.cardano.client.util.HexUtil;
+import com.bloxbean.cardano.client.util.JsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.ipfs.multibase.Multibase;
-import io.ipfs.multihash.Multihash;
 
 import org.cardanofoundation.bolnisiaggregator.common.Constants;
-import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
-import org.cardanofoundation.bolnisiaggregator.model.domain.Cid;
+import org.cardanofoundation.bolnisiaggregator.common.CryptoUtil;
+import org.cardanofoundation.bolnisiaggregator.model.domain.Lot;
+import org.cardanofoundation.bolnisiaggregator.model.domain.NumberOfBottlesAndCerts;
+import org.cardanofoundation.bolnisiaggregator.model.domain.WineryData;
 import org.cardanofoundation.bolnisiaggregator.model.entity.Winery;
 import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository;
 
@@ -37,86 +42,172 @@ import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository
 public class BolnisiProcessor {
 
     @Value("${bolnisi.resolver-url}")
-    private String BOLNISI_RESOLVER_URL;
+    private String bolnisiResolverUrl;
+
+    @Value("${bolnisi.public-key-url}")
+    private String bolnisiPublicKeyUrl;
 
     private final RestTemplate restTemplate;
+
     private final WineryRepository wineryRepository;
 
-    public AggregationDTO processTransaction(co.nstant.in.cbor.model.Map metadata) {
+    public NumberOfBottlesAndCerts processTransaction(co.nstant.in.cbor.model.Map metadata) {
 
-        AggregationDTO aggregationDTO = new AggregationDTO();
+        NumberOfBottlesAndCerts numberOfBottlesAndCerts = new NumberOfBottlesAndCerts();
 
         String type = (metadata.get(new UnicodeString("t"))).toString();
         switch (type) {
             case Constants.SCM_TAG:
-                handleSCMTag(metadata, aggregationDTO);
+                int numberOfBottles = getNumberOfBottlesForSCMTag(metadata);
+                numberOfBottlesAndCerts.setNumberOfBottles(numberOfBottles);
                 break;
             case Constants.CERT_TAG:
-                aggregationDTO.setNumberOfCertificates(1);
+                numberOfBottlesAndCerts.setNumberOfCertificates(1);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown transaction type: " + type);
         }
-        return aggregationDTO;
+        return numberOfBottlesAndCerts;
     }
 
-    private void handleSCMTag(Map metadata, AggregationDTO aggregationDTO) {
-        String rawData = ((UnicodeString) metadata.get(new UnicodeString(Constants.CID_TAG))).getString();
-        java.util.Map<String, List<Cid>> offChainData = getOffChainData(rawData);
+    /**
+     * Verifies the signature of the lots and returns the number of bottles
+     * Verification process involves following steps:
+     * 1. Verify CID of offchain data with the CID in the metadata
+     * 2. Verify Public Key of each winery with the offchain public key
+     * 3. Verify signature of each lot with the public key of the winery
+     * @param metadata cbor decoded metadata
+     * @return number of bottles
+     */
+    @SneakyThrows
+    private int getNumberOfBottlesForSCMTag(co.nstant.in.cbor.model.Map metadata) {
 
-        wineryRepository.saveAll(offChainData.keySet().stream().map(Winery::new).toList());
+        String cid = ((UnicodeString) metadata.get(new UnicodeString(Constants.CID_TAG))).getString();
+        String rawOffChainData = getOffChainData(cid);
+        if(!CryptoUtil.verifyCID(cid, rawOffChainData)) {
+            log.error("CID verification failed for CID: {}", cid);
+            return 0;
+        }
+        HashMap offChainData = new ObjectMapper().readValue(rawOffChainData, HashMap.class);
 
-        int numberOfBottles = getSumOfBottlesForCID(offChainData);
-        aggregationDTO.setNumberOfBottles(numberOfBottles);
+        Map<String, WineryData> wineries = mapMetadataAndOffChainDataToObject(metadata, offChainData);
+
+        // Verifying the signature
+        removeWineriesWithWrongPK(wineries);
+        verifyLotSignature(wineries);
+
+        // saving all Wineries, these will be used to calculate the total number of wineries
+        saveWineries(wineries.keySet());
+        return getSumOfBottlesForCID(wineries);
     }
 
+    private void saveWineries(Set<String> wineries) {
+        wineries.forEach(wineryId -> {
+            try {
+                wineryRepository.flush();
+                Optional<Winery> byId = wineryRepository.findByWineryId(wineryId);
+                if(byId.isPresent()) {
+                    log.info("Winery with ID: {} already exists", wineryId);
+                    return;
+                }
+                wineryRepository.saveAndFlush(Winery.builder().wineryId(wineryId).build());
+            } catch (Exception e) {
+                log.error("Error saving winery with ID: {}", wineryId, e);
+            }
+        });
+    }
+
+    private static Map<String, WineryData> mapMetadataAndOffChainDataToObject(co.nstant.in.cbor.model.Map metadata, HashMap offChainData) {
+        Map<String, WineryData> wineries = new HashMap<>();
+        co.nstant.in.cbor.model.Map publicKeys = (co.nstant.in.cbor.model.Map) metadata.get(new UnicodeString("d"));
+        publicKeys.getKeys().forEach(key -> {
+            if(!offChainData.containsKey(key.toString())) {
+                log.info("Winery ID: {} doesn't have offchain data", key);
+            }
+            co.nstant.in.cbor.model.Map wineryKeys = (co.nstant.in.cbor.model.Map) publicKeys.get(key);
+
+            Array array = (Array) wineryKeys.get(new UnicodeString("s"));
+            List<Lot> lots = new ArrayList<>();
+            for(int i = 0; i < array.getDataItems().size(); i++) {
+                ByteString signatureBytes = (ByteString) array.getDataItems().get(i);
+                String signature = HexUtil.encodeHexString(signatureBytes.getBytes());
+
+                LinkedHashMap<String, Object> linkedHashMap = ((ArrayList<LinkedHashMap<String, Object>>) offChainData.get(key.toString())).get(i);
+                // avoiding to add the same lot again
+                if(lots.stream().filter(lot -> lot.getSignature().equals(signature)).toList().isEmpty()) {
+                    Lot lot = new Lot(signature, (int)linkedHashMap.get("number_of_bottles"), false, linkedHashMap);
+                    lots.add(lot);
+                }
+
+            }
+            String wineryPublicKey = getPublicKey(wineryKeys);
+            wineries.put(key.toString(), new WineryData(wineryPublicKey, lots, false));
+        });
+        return wineries;
+    }
+
+    private void verifyLotSignature(java.util.Map<String, WineryData> wineries) {
+        for (java.util.Map.Entry<String, WineryData> wineryEntry : wineries.entrySet()) {
+
+            WineryData value = wineryEntry.getValue();
+            for (Lot lot : value.getLots()) {
+                boolean isLotSignatureValid = CryptoUtil.verifySignatureWithEd25519(value.getPublicKey(), lot.getSignature(), JsonUtil.getPrettyJson(lot.getRawOffChainData()));
+                lot.setValid(isLotSignatureValid);
+            }
+        }
+    }
+
+    private void removeWineriesWithWrongPK(java.util.Map<String, WineryData> wineries) throws IOException {
+        for (java.util.Map.Entry<String, WineryData> wineryEntry : wineries.entrySet()) {
+            String offChainPublicKey = getOffChainPublicKey(wineryEntry.getKey());
+            if(wineryEntry.getValue().getPublicKey().equals(offChainPublicKey)) {
+                WineryData value = wineryEntry.getValue();
+                value.setPkKeyVerified(true);
+                wineries.put(wineryEntry.getKey(), value);
+            }
+            else {
+                log.info("Public key doesn't match removing ID: {}", wineryEntry.getKey());
+                wineries.remove(wineryEntry.getKey());
+            }
+        }
+    }
+
+    private String getOffChainPublicKey(String wineryID) throws IOException {
+        URL url = new URL(bolnisiPublicKeyUrl.replace("{wineryId}", wineryID));
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        byte[] bytes = conn.getInputStream().readAllBytes();
+        return HexUtil.encodeHexString(bytes);
+    }
+
+    private static String getPublicKey(co.nstant.in.cbor.model.Map wineryMetadata) {
+        ByteString pk = (ByteString) wineryMetadata.get(new UnicodeString("pk"));
+        return HexUtil.encodeHexString(pk.getBytes());
+    }
 
     @SneakyThrows
-    private int getSumOfBottlesForCID(java.util.Map<String, List<Cid>> offchainData) {
+    private int getSumOfBottlesForCID(java.util.Map<String, WineryData> offchainData) {
         int sumBottles = 0;
-        Set<String> keys = offchainData.keySet();
-        Set<String> lotNumberPair = new HashSet<>();
+        for (java.util.Map.Entry<String, WineryData> wineryDataEntry : offchainData.entrySet()) {
+            for (Lot lot : wineryDataEntry.getValue().getLots()) {
 
-        for (String key : keys) {
-            List<Cid> cids = offchainData.get(key);
-            for (Cid cid : cids) {
-                // due to write errors the same lot number can be included within the same transaction
-                // we need to check for duplicates within one transaction and add the number of bottles only once
-                if(lotNumberPair.add(cid.getLotNumber())) {
-                    sumBottles += cid.getNumberOfBottles();
-                }
-                else {
-                    log.info("Duplicate lot number found: {}", cid.getLotNumber());
+                if (lot.isValid()) {
+                    sumBottles += lot.getNumberOfBottles();
                 }
             }
         }
-
         return sumBottles;
     }
 
-    // zCT5htke6Y1aAtZnsMuHaaqsbDzJHtMvMWh5jhD4rira9sGCHWpK
     @SneakyThrows
-    public java.util.Map<String, List<Cid>> getOffChainData(String cid) {
-        String resolverURL = BOLNISI_RESOLVER_URL + cid;
+    public String getOffChainData(String cid) {
+        String resolverURL = bolnisiResolverUrl + cid;
         ResponseEntity<String> forEntity = restTemplate.getForEntity(resolverURL, String.class);
-        String offChainData = getOffChainData(forEntity);
-        byte[] bytes = Blake2bUtil.blake2bHash256(offChainData.getBytes());
-        io.ipfs.cid.Cid cid1 = new io.ipfs.cid.Cid(1, io.ipfs.cid.Cid.Codec.Raw, Multihash.Type.blake2b_256, bytes);
-        String encode = Multibase.encode(Multibase.Base.Base58BTC, cid1.toBytes());
-        if(cid.equals(encode)) {
-            return new ObjectMapper().readValue(offChainData, new TypeReference<java.util.Map<String, List<Cid>>>() {
-            });
-        } else {
-            log.info("CID doesn't match ");
-            return java.util.Map.of();
-        }
-
+        return getOffChainDataFromMinio(forEntity.getBody());
     }
 
 
-    private static String getOffChainData(ResponseEntity<String> forEntity) throws IOException {
-        String minioURL = forEntity.getBody();
-        assert minioURL != null;
+    private String getOffChainDataFromMinio(String minioURL) throws IOException {
         URL url = new URL(minioURL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -129,5 +220,4 @@ public class BolnisiProcessor {
         }
         return result.toString();
     }
-
 }

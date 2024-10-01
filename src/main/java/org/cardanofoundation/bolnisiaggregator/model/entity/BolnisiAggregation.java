@@ -8,8 +8,10 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Builder
 @Data
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Entity
 @Table(name = "bolnisi_aggregation")
 @Slf4j
+@EqualsAndHashCode(exclude = {"id", "slot"})
 public class BolnisiAggregation {
 
     @Id

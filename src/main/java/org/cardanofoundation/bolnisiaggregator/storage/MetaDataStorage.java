@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
-import org.cardanofoundation.bolnisiaggregator.model.domain.AggregationDTO;
+import org.cardanofoundation.bolnisiaggregator.model.domain.NumberOfBottlesAndCerts;
 import org.cardanofoundation.bolnisiaggregator.model.entity.BolnisiAggregation;
 import org.cardanofoundation.bolnisiaggregator.model.repository.BolnisiAggregationRepository;
 import org.cardanofoundation.bolnisiaggregator.model.repository.WineryRepository;
@@ -18,19 +18,22 @@ public class MetaDataStorage {
     private final BolnisiAggregationRepository bolnisiAggregationRepository;
     private final WineryRepository wineryRepository;
 
-    public void addAggregation(AggregationDTO aggregationDTO, Long slot) {
+    public void addAggregation(NumberOfBottlesAndCerts numberOfBottlesAndCerts, Long slot) {
 
         BolnisiAggregation currentAgg = bolnisiAggregationRepository.findBolnisiAggregationWithMaxSlot()
                 .orElse(new BolnisiAggregation());
 
-
-
         BolnisiAggregation bolnisiAggregation1 = new BolnisiAggregation(null,
-                currentAgg.getNumberOfBottles() + aggregationDTO.getNumberOfBottles(),
+                currentAgg.getNumberOfBottles() + numberOfBottlesAndCerts.getNumberOfBottles(),
                 wineryRepository.countAll(),
-                currentAgg.getNumberOfCertificates() + aggregationDTO.getNumberOfCertificates(),
+                currentAgg.getNumberOfCertificates() + numberOfBottlesAndCerts.getNumberOfCertificates(),
                 slot);
-        bolnisiAggregationRepository.save(bolnisiAggregation1);
+
+        if(!currentAgg.equals(bolnisiAggregation1)) {
+            bolnisiAggregationRepository.save(bolnisiAggregation1);
+        } else {
+            log.info("No change in aggregation data. Not saving");
+        }
     }
 
     public int deleteBySlotGreaterThan(long slot) {
