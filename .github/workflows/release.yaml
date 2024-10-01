@@ -1,11 +1,12 @@
-name: Build main branch
-
+name: Release Version
 on:
-  push:
-    branches: [ main ]
-
+  release:
+    types:
+      - published
+permissions:
+  contents: write
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,6 +17,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build Docker Image
-        run: docker build -t kammerlo/cardano-bolnisi-aggregator:latest .
+        run: docker build -t kammerlo/cardano-bolnisi-aggregator:${github.event.release.tag_name}  .
       - name: Push Docker Image
-        run: docker push kammerlo/cardano-bolnisi-aggregator:latest
+        run: docker push kammerlo/cardano-bolnisi-aggregator:${github.event.release.tag_name}

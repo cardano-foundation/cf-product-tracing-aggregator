@@ -133,9 +133,9 @@ public class BolnisiProcessor {
                 String signature = HexUtil.encodeHexString(signatureBytes.getBytes());
 
                 LinkedHashMap<String, Object> linkedHashMap = ((ArrayList<LinkedHashMap<String, Object>>) offChainData.get(key.toString())).get(i);
-                // avoiding to add the same lot again
+                // avoiding to add the same lot again, since there can be duplicates within the metadata
                 if(lots.stream().filter(lot -> lot.getSignature().equals(signature)).toList().isEmpty()) {
-                    Lot lot = new Lot(signature, (int)linkedHashMap.get("number_of_bottles"), false, linkedHashMap);
+                    Lot lot = new Lot(signature, (int)linkedHashMap.get(Constants.NUMBER_OF_BOTTLES), false, linkedHashMap);
                     lots.add(lot);
                 }
 

@@ -10,4 +10,5 @@ public class Constants {
     public static final String SCM_TAG = "scm";
     public static final String CID_TAG = "cid";
     public static final String CERT_TAG = "conformityCert";
+    public static final String NUMBER_OF_BOTTLES = "number_of_bottles";
 }
