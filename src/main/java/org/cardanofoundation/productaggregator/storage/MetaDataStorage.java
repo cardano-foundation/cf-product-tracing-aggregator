@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.cardanofoundation.productaggregator.model.domain.NumberOfUnitsAndCerts;
-import org.cardanofoundation.productaggregator.model.entity.ProductAggregation;
 import org.cardanofoundation.productaggregator.model.entity.Producer;
-import org.cardanofoundation.productaggregator.model.repository.ProductAggregationRepository;
+import org.cardanofoundation.productaggregator.model.entity.ProductAggregation;
 import org.cardanofoundation.productaggregator.model.repository.ProducerRepository;
+import org.cardanofoundation.productaggregator.model.repository.ProductAggregationRepository;
 
 @Component
 @Slf4j
