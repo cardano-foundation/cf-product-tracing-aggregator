@@ -17,6 +17,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build Docker Image
-        run: docker build -t kammerlo/cardano-bolnisi-aggregator:${{ github.event.release.tag_name }}  .
+        run: docker build -t cardanofoundation/cf-product-tracing-aggregator:${{ github.event.release.tag_name }}  .
       - name: Push Docker Image
-        run: docker push kammerlo/cardano-bolnisi-aggregator:${{ github.event.release.tag_name }}
+        run: docker push cardanofoundation/cf-product-tracing-aggregator:${{ github.event.release.tag_name }}
