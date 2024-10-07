@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.cardanofoundation</groupId>
-    <artifactId>bolnisi-aggregator</artifactId>
+    <artifactId>product-aggregator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>bolnisi-aggregator</name>
     <description>bolnisi-aggregator</description>

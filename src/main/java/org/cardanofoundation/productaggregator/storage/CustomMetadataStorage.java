@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.storage;
+package org.cardanofoundation.productaggregator.storage;
 
 import java.util.Collections;
 import java.util.List;

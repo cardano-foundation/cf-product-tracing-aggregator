@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.processor;
+package org.cardanofoundation.productaggregator.processor;
 
 import co.nstant.in.cbor.model.Map;
 import co.nstant.in.cbor.model.UnicodeString;
@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.cardanofoundation.bolnisiaggregator.model.domain.NumberOfBottlesAndCerts;
+import org.cardanofoundation.productaggregator.model.domain.NumberOfUnitsAndCerts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,10 +22,10 @@ class BolnisiProcessorTest {
     void testCertMetadata() {
         Map metadata = new Map();
         metadata.put(new UnicodeString("t"), new UnicodeString("conformityCert"));
-        NumberOfBottlesAndCerts numberOfBottlesAndCerts = bolnisiProcessor.processTransaction(metadata);
+        NumberOfUnitsAndCerts numberofUnitsandCerts = bolnisiProcessor.processTransaction(metadata);
 
-        assertEquals(1, numberOfBottlesAndCerts.getNumberOfCertificates());
-        assertEquals(0, numberOfBottlesAndCerts.getNumberOfBottles());
+        assertEquals(1, numberofUnitsandCerts.getNumberOfCertificates());
+        assertEquals(0, numberofUnitsandCerts.getNumberOfUnits());
     }
 
 }

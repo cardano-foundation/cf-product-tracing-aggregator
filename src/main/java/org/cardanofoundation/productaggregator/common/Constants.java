@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.common;
+package org.cardanofoundation.productaggregator.common;
 
 public class Constants {
 

@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.model.domain;
+package org.cardanofoundation.productaggregator.model.domain;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WineryData {
+public class ProducerData {
     String publicKey;
     List<Lot> lots;
     boolean pkKeyVerified;

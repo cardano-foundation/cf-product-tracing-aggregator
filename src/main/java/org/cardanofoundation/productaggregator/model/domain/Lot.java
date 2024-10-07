@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.model.domain;
+package org.cardanofoundation.productaggregator.model.domain;
 
 import java.util.LinkedHashMap;
 
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class Lot {
 
     private String signature;
-    private int numberOfBottles;
+    private int numberOfUnits;
     private boolean isValid;
     private LinkedHashMap<String, Object> rawOffChainData;
 }

@@ -31,4 +31,6 @@ The configuration is done via the `.env` file. The following variables are avail
 * `DB_SCHEMA` - The schema of the database. Default is `bolnisi`.
 * `INDEXER_START_SLOT` - The slot to start indexing from. Default is `109254210` (First Bolnisi Transaction).
 * `INDEXER_START_HASH` - The hash of the block to start indexing from. Default is `bcd4e8ae24557a526e4243574d53a2e9e1268653e2b73e1c99048d3959edd404` (First Bolnisi Transaction).
-* `BOLNISI_RESOLVER_URL` - The URL of the Bolnisi resolver. Default is `https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/`.
+* `OFFCHAIN_RESOLVER_URL` - The URL of the Bolnisi resolver. Default is `https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/`.
+* `PUBLIC_KEY_URL` - The URL to verify public keys. Default is `https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0`
+* `PUBLIC_KEY_REPLACER` - The String to replace in the public key url. Curly brackets will be added automatically. Default is `wineryId`.

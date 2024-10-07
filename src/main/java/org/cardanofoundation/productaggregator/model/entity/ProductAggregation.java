@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.model.entity;
+package org.cardanofoundation.productaggregator.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,16 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "bolnisi_aggregation")
+@Table(name = "product_aggregation")
 @Slf4j
 @EqualsAndHashCode(exclude = {"id", "slot"})
-public class BolnisiAggregation {
+public class ProductAggregation {
 
     @Id
     @GeneratedValue
     private Long id;
-    int numberOfBottles;
-    int numberOfWineries;
+    int numberOfUnits;
+    int numberOfProducers;
     int numberOfCertificates;
     private Long slot;
 

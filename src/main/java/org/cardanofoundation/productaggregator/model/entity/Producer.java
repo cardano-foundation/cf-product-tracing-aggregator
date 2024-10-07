@@ -1,4 +1,4 @@
-package org.cardanofoundation.bolnisiaggregator.model.entity;
+package org.cardanofoundation.productaggregator.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "wineries")
+@Table(name = "producers")
 @Slf4j
-public class Winery {
+public class Producer {
 
     @Id
     @GeneratedValue
     private Long id;
-    @Column(name = "winery_id", nullable = false)
-    private String wineryId;
+    @Column(name = "producer_id", nullable = false)
+    private String producerId;
 }
