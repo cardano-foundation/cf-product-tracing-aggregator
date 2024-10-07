@@ -1,7 +1,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Kammerlo_cardano-bolnisi-aggregator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Kammerlo_cardano-bolnisi-aggregator)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FKammerlo%2Fcardano-bolnisi-aggregator.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FKammerlo%2Fcardano-bolnisi-aggregator?ref=badge_shield&issueType=license)
 
-# Cardano Bolnisi Aggregator
+# Cardano product tracing aggregator
 This repository implements an aggregator application for the Cardano Foundation Bolnisi Georgian Wine pilot program.
 
 For the pilot, bottles produced by wineries in the Bolnisi region of Georgia will have QR codes attached that link to off-chain data.
