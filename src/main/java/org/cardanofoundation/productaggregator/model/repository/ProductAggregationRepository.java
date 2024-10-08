@@ -14,7 +14,7 @@ public interface ProductAggregationRepository extends JpaRepository<ProductAggre
     @Query("""
             SELECT b FROM ProductAggregation b WHERE b.slot = (SELECT MAX(b.slot) FROM ProductAggregation b)
             """)
-    Optional<ProductAggregation> findBolnisiAggregationWithMaxSlot();
+    Optional<ProductAggregation> findProductAggregationWithMaxSlot();
 
     int deleteBySlotGreaterThan(long slot);
 }

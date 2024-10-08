@@ -11,8 +11,8 @@
     <groupId>org.cardanofoundation</groupId>
     <artifactId>product-aggregator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>bolnisi-aggregator</name>
-    <description>bolnisi-aggregator</description>
+    <name>cf-product-tracing-aggregator</name>
+    <description>cf-product-tracing-aggregator</description>
     <repositories>
         <repository>
             <id>jitpack.io</id>

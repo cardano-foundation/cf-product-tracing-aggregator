@@ -24,7 +24,7 @@ public class MetaDataStorage {
 
     public void addAggregation(NumberOfUnitsAndCerts numberofUnitsandCerts, Long slot) {
 
-        ProductAggregation currentAgg = productAggregationRepository.findBolnisiAggregationWithMaxSlot()
+        ProductAggregation currentAgg = productAggregationRepository.findProductAggregationWithMaxSlot()
                 .orElse(new ProductAggregation());
         Set<String> wineryIds = producerRepository.findAll().stream().map(Producer::getProducerId).collect(Collectors.toSet());
         ProductAggregation productAggregation1 = new ProductAggregation(null,

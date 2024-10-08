@@ -39,13 +39,13 @@ import org.cardanofoundation.productaggregator.model.repository.ProducerReposito
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class BolnisiProcessor {
+public class ProductProcessor {
 
     @Value("${product-tracing.resolver-url}")
-    private String bolnisiResolverUrl;
+    private String offChainResolverUrl;
 
     @Value("${product-tracing.public-key-url}")
-    private String bolnisiPublicKeyUrl;
+    private String publicKeyUrl;
 
     @Value("${product-tracing.public-key-replacer}")
     private String publicKeyReplacer;
@@ -176,7 +176,7 @@ public class BolnisiProcessor {
     }
 
     private String getOffChainPublicKey(String wineryID) throws IOException {
-        URL url = new URL(bolnisiPublicKeyUrl.replace("{" + publicKeyReplacer + "}", wineryID));
+        URL url = new URL(publicKeyUrl.replace("{" + publicKeyReplacer + "}", wineryID));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         byte[] bytes = conn.getInputStream().readAllBytes();
@@ -204,7 +204,7 @@ public class BolnisiProcessor {
 
     @SneakyThrows
     public String getOffChainData(String cid) {
-        String resolverURL = bolnisiResolverUrl + cid;
+        String resolverURL = offChainResolverUrl + cid;
         ResponseEntity<String> forEntity = restTemplate.getForEntity(resolverURL, String.class);
         return getOffChainDataFromMinio(forEntity.getBody());
     }

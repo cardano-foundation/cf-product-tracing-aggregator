@@ -24,7 +24,7 @@ import org.cardanofoundation.productaggregator.storage.MetaDataStorage;
 @Slf4j
 public class CustomMetadataProcessor {
 
-    private final BolnisiProcessor bolnisiProcessor;
+    private final ProductProcessor productProcessor;
     private final MetaDataStorage metaDataStorage;
 
     @EventListener
@@ -33,12 +33,12 @@ public class CustomMetadataProcessor {
         event.getTxMetadataList().stream()
                 .filter(txMetadataLabel -> String.valueOf(Constants.METADATA_TAG).equals(txMetadataLabel.getLabel()))
                 .forEach(txMetadataLabel -> {
-                    log.info("Processing Bolnisi Transaction: {}", txMetadataLabel.getTxHash());
+                    log.info("Processing Transaction: {}", txMetadataLabel.getTxHash());
 
                     DataItem[] deserialize = CborSerializationUtil.deserialize(HexUtil.decodeHexString(txMetadataLabel.getCbor()));
                     Map metadata = (Map)((Map) deserialize[0]).get(new UnsignedInteger(Constants.METADATA_TAG));
 
-                    NumberOfUnitsAndCerts numberofUnitsandCerts = bolnisiProcessor.processTransaction(metadata);
+                    NumberOfUnitsAndCerts numberofUnitsandCerts = productProcessor.processTransaction(metadata);
                     metaDataStorage.addAggregation(numberofUnitsandCerts, event.getEventMetadata().getSlot());
             });
     }

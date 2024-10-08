@@ -18,7 +18,7 @@ services:
       timeout: 3s
       retries: 10
   product-tracing-aggregator:
-    image: cardanofoundation/cf-product-tracing-aggregator:${BOLNISI_AGGREGATOR_DOCKER_IMAGE_TAG}
+    image: cardanofoundation/cf-product-tracing-aggregator:${DOCKER_IMAGE_TAG}
     build:
       context: ./
       dockerfile: ./Dockerfile

@@ -13,16 +13,16 @@ import org.cardanofoundation.productaggregator.model.domain.NumberOfUnitsAndCert
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-class BolnisiProcessorTest {
+class ProductProcessorTest {
 
     @InjectMocks
-    BolnisiProcessor bolnisiProcessor;
+    ProductProcessor productProcessor;
 
     @Test
     void testCertMetadata() {
         Map metadata = new Map();
         metadata.put(new UnicodeString("t"), new UnicodeString("conformityCert"));
-        NumberOfUnitsAndCerts numberofUnitsandCerts = bolnisiProcessor.processTransaction(metadata);
+        NumberOfUnitsAndCerts numberofUnitsandCerts = productProcessor.processTransaction(metadata);
 
         assertEquals(1, numberofUnitsandCerts.getNumberOfCertificates());
         assertEquals(0, numberofUnitsandCerts.getNumberOfUnits());
