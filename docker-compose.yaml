@@ -17,8 +17,8 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
-  bolnisi-aggregator:
-    image: kammerlo/cardano-bolnisi-aggregator:${BOLNISI_AGGREGATOR_DOCKER_IMAGE_TAG}
+  product-tracing-aggregator:
+    image: cardanofoundation/cf-product-tracing-aggregator:${BOLNISI_AGGREGATOR_DOCKER_IMAGE_TAG}
     build:
       context: ./
       dockerfile: ./Dockerfile
