@@ -2,6 +2,9 @@ package org.cardanofoundation.productaggregator.common;
 
 public class Constants {
 
+    public static final String PRODCUER_METADATA_INDEX = "d";
+    public static final String PRODUCER_PUBKEYS_INDEX = "s";
+
     private Constants() {
         throw new IllegalStateException("Utility class");
     }

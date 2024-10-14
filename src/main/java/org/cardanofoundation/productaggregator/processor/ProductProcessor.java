@@ -93,15 +93,15 @@ public class ProductProcessor {
         }
         HashMap offChainData = new ObjectMapper().readValue(rawOffChainData, HashMap.class);
 
-        Map<String, ProducerData> wineries = mapMetadataAndOffChainDataToObject(metadata, offChainData);
+        Map<String, ProducerData> producers = mapMetadataAndOffChainDataToObject(metadata, offChainData);
 
         // Verifying the signature
-        removeWineriesWithWrongPK(wineries);
-        verifyLotSignature(wineries);
+        removeWineriesWithWrongPK(producers);
+        verifyLotSignature(producers);
 
-        // saving all Wineries, these will be used to calculate the total number of wineries
-        saveWineries(wineries.keySet());
-        return getSumOfBottlesForCID(wineries);
+        // saving all producers, these will be used to calculate the total number of producers
+        saveWineries(producers.keySet());
+        return getSumOfProductsForCID(producers);
     }
 
     private void saveWineries(Set<String> producers) {
@@ -121,15 +121,15 @@ public class ProductProcessor {
     }
 
     private static Map<String, ProducerData> mapMetadataAndOffChainDataToObject(co.nstant.in.cbor.model.Map metadata, HashMap offChainData) {
-        Map<String, ProducerData> wineries = new HashMap<>();
-        co.nstant.in.cbor.model.Map publicKeys = (co.nstant.in.cbor.model.Map) metadata.get(new UnicodeString("d"));
+        Map<String, ProducerData> producers = new HashMap<>();
+        co.nstant.in.cbor.model.Map publicKeys = (co.nstant.in.cbor.model.Map) metadata.get(new UnicodeString(Constants.PRODCUER_METADATA_INDEX));
         publicKeys.getKeys().forEach(key -> {
             if(!offChainData.containsKey(key.toString())) {
-                log.info("Winery ID: {} doesn't have offchain data", key);
+                log.info("Producer ID: {} doesn't have offchain data", key);
             }
-            co.nstant.in.cbor.model.Map wineryKeys = (co.nstant.in.cbor.model.Map) publicKeys.get(key);
+            co.nstant.in.cbor.model.Map producerKeys = (co.nstant.in.cbor.model.Map) publicKeys.get(key);
 
-            Array array = (Array) wineryKeys.get(new UnicodeString("s"));
+            Array array = (Array) producerKeys.get(new UnicodeString(Constants.PRODUCER_PUBKEYS_INDEX));
             List<Lot> lots = new ArrayList<>();
             for(int i = 0; i < array.getDataItems().size(); i++) {
                 ByteString signatureBytes = (ByteString) array.getDataItems().get(i);
@@ -143,16 +143,16 @@ public class ProductProcessor {
                 }
 
             }
-            String wineryPublicKey = getPublicKey(wineryKeys);
-            wineries.put(key.toString(), new ProducerData(wineryPublicKey, lots, false));
+            String wineryPublicKey = getPublicKey(producerKeys);
+            producers.put(key.toString(), new ProducerData(wineryPublicKey, lots, false));
         });
-        return wineries;
+        return producers;
     }
 
-    private void verifyLotSignature(java.util.Map<String, ProducerData> wineries) {
-        for (java.util.Map.Entry<String, ProducerData> wineryEntry : wineries.entrySet()) {
+    private void verifyLotSignature(java.util.Map<String, ProducerData> producers) {
+        for (java.util.Map.Entry<String, ProducerData> producerDataEntry : producers.entrySet()) {
 
-            ProducerData value = wineryEntry.getValue();
+            ProducerData value = producerDataEntry.getValue();
             for (Lot lot : value.getLots()) {
                 boolean isLotSignatureValid = CryptoUtil.verifySignatureWithEd25519(value.getPublicKey(), lot.getSignature(), JsonUtil.getPrettyJson(lot.getRawOffChainData()));
                 lot.setValid(isLotSignatureValid);
@@ -160,46 +160,46 @@ public class ProductProcessor {
         }
     }
 
-    private void removeWineriesWithWrongPK(java.util.Map<String, ProducerData> wineries) throws IOException {
-        for (java.util.Map.Entry<String, ProducerData> wineryEntry : wineries.entrySet()) {
-            String offChainPublicKey = getOffChainPublicKey(wineryEntry.getKey());
-            if(wineryEntry.getValue().getPublicKey().equals(offChainPublicKey)) {
-                ProducerData value = wineryEntry.getValue();
+    private void removeWineriesWithWrongPK(java.util.Map<String, ProducerData> producers) throws IOException {
+        for (java.util.Map.Entry<String, ProducerData> producerDataEntry : producers.entrySet()) {
+            String offChainPublicKey = getOffChainPublicKey(producerDataEntry.getKey());
+            if(producerDataEntry.getValue().getPublicKey().equals(offChainPublicKey)) {
+                ProducerData value = producerDataEntry.getValue();
                 value.setPkKeyVerified(true);
-                wineries.put(wineryEntry.getKey(), value);
+                producers.put(producerDataEntry.getKey(), value);
             }
             else {
-                log.info("Public key doesn't match removing ID: {}", wineryEntry.getKey());
-                wineries.remove(wineryEntry.getKey());
+                log.info("Public key doesn't match removing ID: {}", producerDataEntry.getKey());
+                producers.remove(producerDataEntry.getKey());
             }
         }
     }
 
-    private String getOffChainPublicKey(String wineryID) throws IOException {
-        URL url = new URL(publicKeyUrl.replace("{" + publicKeyReplacer + "}", wineryID));
+    private String getOffChainPublicKey(String producerId) throws IOException {
+        URL url = new URL(publicKeyUrl.replace("{" + publicKeyReplacer + "}", producerId));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         byte[] bytes = conn.getInputStream().readAllBytes();
         return HexUtil.encodeHexString(bytes);
     }
 
-    private static String getPublicKey(co.nstant.in.cbor.model.Map wineryMetadata) {
-        ByteString pk = (ByteString) wineryMetadata.get(new UnicodeString("pk"));
+    private static String getPublicKey(co.nstant.in.cbor.model.Map productMetadata) {
+        ByteString pk = (ByteString) productMetadata.get(new UnicodeString("pk"));
         return HexUtil.encodeHexString(pk.getBytes());
     }
 
     @SneakyThrows
-    private int getSumOfBottlesForCID(java.util.Map<String, ProducerData> offchainData) {
-        int sumBottles = 0;
-        for (java.util.Map.Entry<String, ProducerData> wineryDataEntry : offchainData.entrySet()) {
-            for (Lot lot : wineryDataEntry.getValue().getLots()) {
+    private int getSumOfProductsForCID(java.util.Map<String, ProducerData> offchainData) {
+        int sumProducts = 0;
+        for (java.util.Map.Entry<String, ProducerData> productDataEntry : offchainData.entrySet()) {
+            for (Lot lot : productDataEntry.getValue().getLots()) {
 
                 if (lot.isValid()) {
-                    sumBottles += lot.getNumberOfUnits();
+                    sumProducts += lot.getNumberOfUnits();
                 }
             }
         }
-        return sumBottles;
+        return sumProducts;
     }
 
     @SneakyThrows
