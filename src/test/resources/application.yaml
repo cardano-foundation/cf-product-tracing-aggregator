@@ -35,6 +35,8 @@ store:
         blocks-partition-size: 10
         use-virtual-thread-for-batch-processing: true
         use-virtual-thread-for-event-processing: true
+    metadata:
+        api-enabled: false
 
 product-tracing:
     resolver-url: ${OFFCHAIN_RESOLVER_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/}
