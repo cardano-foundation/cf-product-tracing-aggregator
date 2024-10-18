@@ -6,13 +6,13 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import org.cardanofoundation.productaggregator.model.entity.Producer;
+import org.cardanofoundation.productaggregator.model.entity.ProducerEntity;
 
-public interface ProducerRepository extends JpaRepository<Producer, Long> {
+public interface ProducerRepository extends JpaRepository<ProducerEntity, Long> {
 
-    @Query("SELECT COUNT(w) FROM Producer w")
+    @Query("SELECT COUNT(w) FROM ProducerEntity w")
     int countAll();
 
-    Optional<List<Producer>> findByProducerId(String producerId);
+    Optional<List<ProducerEntity>> findByProducerId(String producerId);
 
 }

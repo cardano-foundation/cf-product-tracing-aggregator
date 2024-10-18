@@ -1,0 +1,42 @@
+server:
+    port: 8080
+spring:
+    apiPrefix: /api/v1
+    application:
+        name: product-tracing-aggregator
+    flyway:
+        locations: classpath:db/store/{vendor}
+        out-of-order: true
+    jpa:
+        hibernate:
+            ddl-auto: create-drop
+    datasource:
+        url: jdbc:h2:mem:mydb
+        username: sa
+        password: password
+
+################## Network Configuration ###########
+# Provide network details
+####################################################
+
+store:
+    cardano:
+        host: ${CARDANO_NODE_HOST:backbone.mainnet.cardanofoundation.org}
+        port: ${CARDANO_NODE_PORT:3001}
+        protocol-magic: ${PROTOCOL_MAGIC:764824073}
+        sync-start-slot: ${INDEXER_START_SLOT:106517735}
+        sync-start-blockhash: ${INDEXER_START_HASH:71b9fecf1bdf9a1bc0c6748e49c3663539d34179f7e262240235aad38658ef0e}
+    executor:
+        enable-parallel-processing: true
+        block-processing-threads: 15
+        event-processing-threads: 30
+
+        blocks-batch-size: 200
+        blocks-partition-size: 10
+        use-virtual-thread-for-batch-processing: true
+        use-virtual-thread-for-event-processing: true
+
+product-tracing:
+    resolver-url: ${OFFCHAIN_RESOLVER_URL:https://offchain.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/storage/objectUrl/georgian-wine/}
+    public-key-url: ${PUBLIC_KEY_URL:https://api.pro.cf-bolnisi-mainnet.eu-west-1.bnwa.metadata.dev.cf-deployments.org/api/v1/pubkeys/{wineryId}/v/0}
+    public-key-replacer: ${PUBLIC_KEY_REPLACE:wineryId}
