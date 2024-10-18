@@ -15,11 +15,7 @@ To index the data [yaci-store](https://github.com/bloxbean/yaci-store) is used. 
 3. Run the container with `docker compose --env-file .env up --build -d`
 
 ## API
-The Aggregator provides an API to retrieve the aggregated data. The following endpoints are available:
-* `GET /productaggregation` - Returns the all aggregated data - Pagination is possible
-* `GET /productaggregation/{slot}` - Returns the aggregated data for a specific slot
-* `GET /productaggregation/latest` - Returns the latest aggregated data
-
+The Aggregator provides an API to retrieve the aggregated data.
 The Swagger API can be found at `/swagger-ui/index.html`
 
 ## Configuration
