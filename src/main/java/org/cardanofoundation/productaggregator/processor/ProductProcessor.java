@@ -33,7 +33,7 @@ import org.cardanofoundation.productaggregator.common.CryptoUtil;
 import org.cardanofoundation.productaggregator.model.domain.Lot;
 import org.cardanofoundation.productaggregator.model.domain.NumberOfUnitsAndCerts;
 import org.cardanofoundation.productaggregator.model.domain.ProducerData;
-import org.cardanofoundation.productaggregator.model.entity.Producer;
+import org.cardanofoundation.productaggregator.model.entity.ProducerEntity;
 import org.cardanofoundation.productaggregator.model.repository.ProducerRepository;
 
 @Component
@@ -108,12 +108,12 @@ public class ProductProcessor {
         producers.forEach(producerId -> {
             try {
                 producerRepository.flush();
-                Optional<List<Producer>> byId = producerRepository.findByProducerId(producerId);
+                Optional<List<ProducerEntity>> byId = producerRepository.findByProducerId(producerId);
                 if(byId.isPresent()) {
                     log.info("Winery with ID: {} already exists", producerId);
                     return;
                 }
-                producerRepository.saveAndFlush(Producer.builder().producerId(producerId).build());
+                producerRepository.saveAndFlush(ProducerEntity.builder().producerId(producerId).build());
             } catch (Exception e) {
                 log.error("Error saving winery with ID: {}", producerId, e);
             }

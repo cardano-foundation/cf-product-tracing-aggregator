@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.cardanofoundation.productaggregator.model.domain.NumberOfUnitsAndCerts;
-import org.cardanofoundation.productaggregator.model.entity.Producer;
-import org.cardanofoundation.productaggregator.model.entity.ProductAggregation;
+import org.cardanofoundation.productaggregator.model.entity.ProducerEntity;
+import org.cardanofoundation.productaggregator.model.entity.ProductAggregationEntity;
 import org.cardanofoundation.productaggregator.model.repository.ProducerRepository;
 import org.cardanofoundation.productaggregator.model.repository.ProductAggregationRepository;
 
@@ -24,17 +24,17 @@ public class MetaDataStorage {
 
     public void addAggregation(NumberOfUnitsAndCerts numberofUnitsandCerts, Long slot) {
 
-        ProductAggregation currentAgg = productAggregationRepository.findProductAggregationWithMaxSlot()
-                .orElse(new ProductAggregation());
-        Set<String> wineryIds = producerRepository.findAll().stream().map(Producer::getProducerId).collect(Collectors.toSet());
-        ProductAggregation productAggregation1 = new ProductAggregation(null,
+        ProductAggregationEntity currentAgg = productAggregationRepository.findProductAggregationWithMaxSlot()
+                .orElse(new ProductAggregationEntity());
+        Set<String> wineryIds = producerRepository.findAll().stream().map(ProducerEntity::getProducerId).collect(Collectors.toSet());
+        ProductAggregationEntity productAggregationEntity1 = new ProductAggregationEntity(null,
                 currentAgg.getNumberOfUnits() + numberofUnitsandCerts.getNumberOfUnits(),
                 wineryIds.size(),
                 currentAgg.getNumberOfCertificates() + numberofUnitsandCerts.getNumberOfCertificates(),
                 slot);
 
-        if(!currentAgg.equals(productAggregation1)) {
-            productAggregationRepository.save(productAggregation1);
+        if(!currentAgg.equals(productAggregationEntity1)) {
+            productAggregationRepository.save(productAggregationEntity1);
         } else {
             log.info("No change in aggregation data. Not saving");
         }

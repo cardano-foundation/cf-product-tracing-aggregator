@@ -5,16 +5,18 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import org.cardanofoundation.productaggregator.model.entity.ProductAggregation;
+import org.cardanofoundation.productaggregator.model.entity.ProductAggregationEntity;
 
 
-public interface ProductAggregationRepository extends JpaRepository<ProductAggregation, Long> {
+public interface ProductAggregationRepository extends JpaRepository<ProductAggregationEntity, Long> {
 
 
     @Query("""
-            SELECT b FROM ProductAggregation b WHERE b.slot = (SELECT MAX(b.slot) FROM ProductAggregation b)
+            SELECT b FROM ProductAggregationEntity b WHERE b.slot = (SELECT MAX(b.slot) FROM ProductAggregationEntity b)
             """)
-    Optional<ProductAggregation> findProductAggregationWithMaxSlot();
+    Optional<ProductAggregationEntity> findProductAggregationWithMaxSlot();
 
     int deleteBySlotGreaterThan(long slot);
+
+    Optional<ProductAggregationEntity> findProductAggregationEntityBySlot(Long slot);
 }
