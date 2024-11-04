@@ -100,16 +100,16 @@ public class ProductProcessor {
         verifyLotSignature(producers);
 
         // saving all producers, these will be used to calculate the total number of producers
-        saveWineries(producers.keySet());
+        saveProducers(producers.keySet());
         return getSumOfProductsForCID(producers);
     }
 
-    private void saveWineries(Set<String> producers) {
+    private void saveProducers(Set<String> producers) {
         producers.forEach(producerId -> {
             try {
                 producerRepository.flush();
                 Optional<List<ProducerEntity>> byId = producerRepository.findByProducerId(producerId);
-                if(byId.isPresent()) {
+                if(byId.isPresent() && !byId.get().isEmpty()) {
                     log.info("Winery with ID: {} already exists", producerId);
                     return;
                 }
