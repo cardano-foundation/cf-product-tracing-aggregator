@@ -14,6 +14,8 @@ spring:
         password: ${DB_PASSWORD:productagg}
 server:
     port: 8080
+    servlet:
+        context-path: /api/v1/product-tracing-aggregator
 ################## Network Configuration ###########
 # Provide network details
 ####################################################
